@@ -2,7 +2,7 @@
     "uuid": "gnomevantage@unaibenidorm",
     "name": "GnomeVantage",
     "description": "Control features of your Lenovo Legion or Ideapad laptop such as battery fast charging, conservation mode, hybrid graphics and more.",
-    "shell-version": ["45", "46", "47", "48"],
+    "shell-version": ["45", "46", "47", "48", "49"],
     "url": "https://gitlab.com/unaibenidorm/gnomevantage",
     "version-name": "1.0",
     "gettext-domain": "gnomevantage@unaibenidorm",
