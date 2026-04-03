@@ -1,0 +1,141 @@
+/**
+ * GnomeVantage Stylesheet
+ *
+ * Custom styles for the GNOME Shell extension popup menu.
+ * Uses St (Shell Toolkit) CSS, not standard web CSS.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
+/* ===== Panel Icon ===== */
+.gnomevantage-panel-icon {
+    icon-size: 18px;
+}
+
+/* ===== Header ===== */
+.gnomevantage-header {
+    font-weight: bold;
+    font-size: 14px;
+    color: #c0bfbc;
+    padding: 4px 0;
+}
+
+/* ===== Menu Item Layout ===== */
+.gnomevantage-item-icon {
+    icon-size: 22px;
+    margin-right: 10px;
+    color: #c0bfbc;
+}
+
+.gnomevantage-item-text {
+    padding: 2px 0;
+    margin-right: 12px;
+}
+
+.gnomevantage-item-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f6f5f4;
+}
+
+.gnomevantage-item-desc {
+    font-size: 11px;
+    color: #9a9996;
+    margin-top: 1px;
+}
+
+/* ===== Status Button ===== */
+.gnomevantage-status-btn {
+    border-radius: 6px;
+    padding: 4px 10px;
+    min-width: 72px;
+    border: none;
+    transition-duration: 200ms;
+}
+
+.gnomevantage-status-btn:hover {
+    opacity: 0.85;
+}
+
+.gnomevantage-status-label {
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* --- Active (green) --- */
+.gnomevantage-status-active {
+    background-color: rgba(46, 194, 126, 0.25);
+}
+
+.gnomevantage-status-active .gnomevantage-status-label {
+    color: #2ec27e;
+}
+
+/* --- Inactive (red) --- */
+.gnomevantage-status-inactive {
+    background-color: rgba(224, 27, 36, 0.2);
+}
+
+.gnomevantage-status-inactive .gnomevantage-status-label {
+    color: #e01b24;
+}
+
+/* --- Pending (purple) --- */
+.gnomevantage-status-pending {
+    background-color: rgba(145, 65, 172, 0.2);
+}
+
+.gnomevantage-status-pending .gnomevantage-status-label {
+    color: #9141ac;
+}
+
+/* --- Reboot (amber/yellow) --- */
+.gnomevantage-status-reboot {
+    background-color: rgba(229, 165, 10, 0.25);
+}
+
+.gnomevantage-status-reboot .gnomevantage-status-label {
+    color: #e5a50a;
+}
+
+/* --- N/A (grey) --- */
+.gnomevantage-status-na {
+    background-color: rgba(154, 153, 150, 0.15);
+}
+
+.gnomevantage-status-na .gnomevantage-status-label {
+    color: #77767b;
+}
+
+/* ===== No Hardware Message ===== */
+.gnomevantage-no-hw {
+    color: #77767b;
+    font-style: italic;
+    font-size: 12px;
+    padding: 8px 0;
+}
+
+/* ===== Reboot Dialog ===== */
+.gnomevantage-reboot-content {
+    padding: 16px 24px;
+    spacing: 12px;
+}
+
+.gnomevantage-reboot-icon {
+    icon-size: 48px;
+    color: #e5a50a;
+}
+
+.gnomevantage-reboot-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #f6f5f4;
+    text-align: center;
+}
+
+.gnomevantage-reboot-subtitle {
+    font-size: 13px;
+    color: #c0bfbc;
+    text-align: center;
+}

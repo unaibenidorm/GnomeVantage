@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnomevantage@unaibenidorm">
+  <schema id="org.gnome.shell.extensions.gnomevantage" path="/org/gnome/shell/extensions/gnomevantage/">
+
+    <!-- Ideapad controls visibility -->
+    <key name="show-fn-lock" type="b">
+      <default>true</default>
+      <summary>Show Fn Lock control</summary>
+      <description>Whether to show the Fn Lock toggle in the menu.</description>
+    </key>
+
+    <key name="show-conservation-mode" type="b">
+      <default>true</default>
+      <summary>Show Battery Conservation control</summary>
+      <description>Whether to show the Battery Conservation toggle in the menu.</description>
+    </key>
+
+    <key name="show-usb-charging" type="b">
+      <default>true</default>
+      <summary>Show Always On USB control</summary>
+      <description>Whether to show the Always On USB toggle in the menu.</description>
+    </key>
+
+    <!-- Legion controls visibility -->
+    <key name="show-winkey" type="b">
+      <default>true</default>
+      <summary>Show Super Key control</summary>
+      <description>Whether to show the Super Key toggle in the menu.</description>
+    </key>
+
+    <key name="show-touchpad" type="b">
+      <default>true</default>
+      <summary>Show Touchpad control</summary>
+      <description>Whether to show the Touchpad toggle in the menu.</description>
+    </key>
+
+    <key name="show-rapidcharge" type="b">
+      <default>true</default>
+      <summary>Show Fast Charge control</summary>
+      <description>Whether to show the Fast Charge toggle in the menu.</description>
+    </key>
+
+    <key name="show-overdrive" type="b">
+      <default>true</default>
+      <summary>Show Display Overdrive control</summary>
+      <description>Whether to show the Display Overdrive toggle in the menu.</description>
+    </key>
+
+    <key name="show-gsync" type="b">
+      <default>true</default>
+      <summary>Show Hybrid Graphics control</summary>
+      <description>Whether to show the Hybrid Graphics toggle in the menu.</description>
+    </key>
+
+    <key name="show-top-bar-icon" type="b">
+      <default>true</default>
+      <summary>Show top bar indicator</summary>
+      <description>Whether to show the extension icon in the GNOME top bar.</description>
+    </key>
+
+    <key name="show-quick-settings-entry" type="b">
+      <default>true</default>
+      <summary>Show quick settings entry</summary>
+      <description>Whether to show a GnomeVantage entry in GNOME quick settings.</description>
+    </key>
+
+    <key name="panel-icon-name" type="s">
+      <default>'plasmoid-auto'</default>
+      <summary>Top bar icon name</summary>
+      <description>The symbolic icon name used in the GNOME top bar indicator.</description>
+    </key>
+
+  </schema>
+</schemalist>

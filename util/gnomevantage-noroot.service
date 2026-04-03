@@ -1,0 +1,17 @@
+[Unit]
+Description=Set user permissions for GnomeVantage
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/fn_lock"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/usb_charging"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/winkey"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/touchpad"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/rapidcharge"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/overdrive"
+ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/gsync"
+
+[Install]
+WantedBy=multi-user.target
