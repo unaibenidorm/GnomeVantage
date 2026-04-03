@@ -95,5 +95,5 @@ Mozilla Public License 2.0.
 
 ## Credits
 
-- Original [PlasmaVantage](https://gitlab.com/unaibenidorm/plasmavantage) by unaibenidorm
+- Original [PlasmaVantage](https://gitlab.com/Scias/plasmavantage) by Scias
 - Some icons are derivative work from [SVGRepo](https://www.svgrepo.com)
