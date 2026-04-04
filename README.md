@@ -1,6 +1,6 @@
 # GnomeVantage for GNOME Shell 45+
 
-> Converted from [PlasmaVantage](https://gitlab.com/unaibenidorm/plasmavantage) (KDE Plasma 6)
+> GNOME port by unaibenidorm, based on [PlasmaVantage](https://gitlab.com/Scias/plasmavantage) by Scias (KDE Plasma 6)
 
 This GNOME Shell extension allows you to easily control features of your Lenovo Legion or Ideapad laptop series such as battery fast charging, conservation mode, hybrid graphics and more that are exposed by the [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) and Ideapad kernel modules.
 
@@ -33,7 +33,7 @@ This is meant to offer an alternative to the official, proprietary and Windows-o
 
 ## Requirements
 
-- **GNOME Shell** 45, 46, 47, or 48
+- **GNOME Shell** 45, 46, 47, 48, 49, or 50
 - [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) kernel module (for Legion controls)
 - Ideapad kernel module (included in mainline Linux, for Ideapad controls)
 
@@ -95,5 +95,6 @@ Mozilla Public License 2.0.
 
 ## Credits
 
-- Original [PlasmaVantage](https://gitlab.com/unaibenidorm/plasmavantage) by unaibenidorm
+- Original [PlasmaVantage](https://gitlab.com/Scias/plasmavantage) by Scias
+- [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) by johnfanv2 and contributors
 - Some icons are derivative work from [SVGRepo](https://www.svgrepo.com)

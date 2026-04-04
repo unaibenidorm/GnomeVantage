@@ -4,7 +4,7 @@
  * Control features of your Lenovo Legion or Ideapad laptop such as
  * battery fast charging, conservation mode, hybrid graphics and more.
  *
- * Converted from PlasmaVantage (KDE Plasma 6 plasmoid) by unaibenidorm.
+ * GNOME port by unaibenidorm, based on PlasmaVantage by Scias.
  *
  * SPDX-License-Identifier: MPL-2.0
  */

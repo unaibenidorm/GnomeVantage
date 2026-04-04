@@ -218,7 +218,7 @@ export default class GnomeVantagePreferences extends ExtensionPreferences {
 
         const aboutGroup = new Adw.PreferencesGroup({
             title: 'GnomeVantage',
-            description: _('Control features of your Lenovo Legion or Ideapad laptop.\n\nConverted from PlasmaVantage by unaibenidorm.\nLicensed under Mozilla Public License 2.0.'),
+            description: _('Control features of your Lenovo Legion or Ideapad laptop.\n\nGNOME port by unaibenidorm.\nBased on PlasmaVantage by Scias and LenovoLegionLinux by johnfanv2.\nLicensed under Mozilla Public License 2.0.'),
         });
         aboutPage.add(aboutGroup);
 
