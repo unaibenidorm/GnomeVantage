@@ -33,7 +33,7 @@ This is meant to offer an alternative to the official, proprietary and Windows-o
 
 ## Requirements
 
-- **GNOME Shell** 45, 46, 47, 48 and 49
+- **GNOME Shell** 45, 46, 47, or 48
 - [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) kernel module (for Legion controls)
 - Ideapad kernel module (included in mainline Linux, for Ideapad controls)
 
@@ -95,5 +95,5 @@ Mozilla Public License 2.0.
 
 ## Credits
 
-- Original [PlasmaVantage](https://gitlab.com/Scias/plasmavantage) by Scias
+- Original [PlasmaVantage](https://gitlab.com/unaibenidorm/plasmavantage) by unaibenidorm
 - Some icons are derivative work from [SVGRepo](https://www.svgrepo.com)

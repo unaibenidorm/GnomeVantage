@@ -36,6 +36,31 @@ function resolvePanelIconKey(settings, interfaceSettings) {
     return darkTheme ? 'plasmoid light' : 'plasmoid';
 }
 
+function removeStaleVantageQuickSettingsEntries() {
+    const quickSettings = Main.panel?.statusArea?.quickSettings;
+    const grid = quickSettings?.menu?._grid;
+    if (!grid || !grid.get_children)
+        return;
+
+    for (const actor of grid.get_children()) {
+        const delegate = actor?._delegate;
+        if (!delegate || !delegate.destroy)
+            continue;
+
+        const titleText = typeof delegate.title === 'string'
+            ? delegate.title
+            : delegate.title?.text;
+
+        const isVantageEntry =
+            delegate._vantageSource === 'gnomevantage' ||
+            delegate.constructor?.name === 'VantageQuickSettingsToggle' ||
+            titleText === 'Vantage';
+
+        if (isVantageEntry)
+            delegate.destroy();
+    }
+}
+
 /**
  * Custom PopupMenu item with an icon, label column, and a status button.
  * Replaces the KDE PlasmaComponents.ItemDelegate + Button pattern.
@@ -458,6 +483,7 @@ class VantageQuickSettingsToggle extends QuickSettings.QuickToggle {
         this._topBarIndicator = topBarIndicator;
         this._settingsSignals = [];
         this._interfaceSignalId = 0;
+        this._vantageSource = 'gnomevantage';
 
         this.connect('clicked', () => this._openTopBarMenu());
 
@@ -524,6 +550,11 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
     destroy() {
         for (const signalId of this._settingsSignals)
             this._settings.disconnect(signalId);
+
+        for (const item of this.quickSettingsItems)
+            item.destroy();
+
+        this.quickSettingsItems.length = 0;
         this._settingsSignals = [];
         super.destroy();
     }
@@ -543,6 +574,20 @@ export default class GnomeVantageExtension extends Extension {
 
     enable() {
         console.log('[GnomeVantage] Enabling extension');
+
+        // Defensive cleanup in case GNOME resumes with stale actors still mounted.
+        if (this._quickSettingsIndicator) {
+            this._quickSettingsIndicator.destroy();
+            this._quickSettingsIndicator = null;
+        }
+
+        if (this._indicator) {
+            this._indicator.destroy();
+            this._indicator = null;
+        }
+
+        removeStaleVantageQuickSettingsEntries();
+
         this._settings = this.getSettings();
         this._interfaceSettings = new Gio.Settings({schema_id: INTERFACE_SCHEMA});
         this._indicator = new VantageIndicator(this.path, this._settings);
