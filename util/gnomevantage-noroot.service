@@ -4,14 +4,8 @@ Description=Set user permissions for GnomeVantage
 [Service]
 Type=oneshot
 User=root
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/fn_lock"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/usb_charging"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/winkey"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/touchpad"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/rapidcharge"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/overdrive"
-ExecStart=-/usr/bin/chmod a+w "/sys/bus/platform/drivers/legion/PNP0C09:00/gsync"
+ExecStart=-/usr/bin/sh -c 'for d in /sys/bus/platform/drivers/ideapad_acpi/*; do [ -e "$d/fn_lock" ] && /usr/bin/chmod a+w "$d/fn_lock"; [ -e "$d/conservation_mode" ] && /usr/bin/chmod a+w "$d/conservation_mode"; [ -e "$d/usb_charging" ] && /usr/bin/chmod a+w "$d/usb_charging"; done'
+ExecStart=-/usr/bin/sh -c 'for d in /sys/bus/platform/drivers/legion/*; do [ -e "$d/winkey" ] && /usr/bin/chmod a+w "$d/winkey"; [ -e "$d/touchpad" ] && /usr/bin/chmod a+w "$d/touchpad"; [ -e "$d/rapidcharge" ] && /usr/bin/chmod a+w "$d/rapidcharge"; [ -e "$d/overdrive" ] && /usr/bin/chmod a+w "$d/overdrive"; [ -e "$d/gsync" ] && /usr/bin/chmod a+w "$d/gsync"; done'
 
 [Install]
 WantedBy=multi-user.target
