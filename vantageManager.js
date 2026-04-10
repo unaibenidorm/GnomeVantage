@@ -14,6 +14,21 @@ import GLib from 'gi://GLib';
 const IDEAPAD_MOD_PATH = '/sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/';
 const LEGION_MOD_PATH  = '/sys/bus/platform/drivers/legion/PNP0C09:00/';
 
+const IDEAPAD_DRIVER_PATH = '/sys/bus/platform/drivers/ideapad_acpi/';
+const LEGION_DRIVER_PATH  = '/sys/bus/platform/drivers/legion/';
+
+const SYSFS_META_ENTRIES = new Set([
+    'bind',
+    'unbind',
+    'module',
+    'uevent',
+    'new_id',
+    'remove_id',
+    'drivers_probe',
+    'driver_override',
+    'suppress_bind_attrs',
+]);
+
 /**
  * Definition of all available hardware controls.
  * Each control maps to a sysfs file under the relevant module path.
@@ -96,6 +111,7 @@ export const VANTAGE_CONTROLS = [
 
 export class VantageManager {
     constructor() {
+        this._modulePathCache = {};
         this._log('Initializing VantageManager');
     }
 
@@ -104,11 +120,74 @@ export class VantageManager {
      * @param {string} module - 'legion' or 'ideapad'
      * @returns {string|null}
      */
-    _getModulePath(module) {
-        if (module === 'legion')
-            return LEGION_MOD_PATH;
-        else if (module === 'ideapad')
-            return IDEAPAD_MOD_PATH;
+    _getModulePath(module, param = null) {
+        const roots = {
+            legion: LEGION_DRIVER_PATH,
+            ideapad: IDEAPAD_DRIVER_PATH,
+        };
+
+        const legacyPaths = {
+            legion: LEGION_MOD_PATH,
+            ideapad: IDEAPAD_MOD_PATH,
+        };
+
+        const rootPath = roots[module];
+        const legacyPath = legacyPaths[module];
+        if (!rootPath || !legacyPath)
+            return null;
+
+        const cachedPath = this._modulePathCache[module];
+        if (cachedPath) {
+            if (!param && GLib.file_test(cachedPath, GLib.FileTest.IS_DIR))
+                return cachedPath;
+            if (param && GLib.file_test(cachedPath + param, GLib.FileTest.EXISTS))
+                return cachedPath;
+        }
+
+        const candidates = [];
+
+        if (GLib.file_test(legacyPath, GLib.FileTest.IS_DIR))
+            candidates.push(legacyPath);
+
+        if (GLib.file_test(rootPath, GLib.FileTest.IS_DIR)) {
+            try {
+                const dirFile = Gio.File.new_for_path(rootPath);
+                const enumerator = dirFile.enumerate_children(
+                    'standard::name',
+                    Gio.FileQueryInfoFlags.NONE,
+                    null
+                );
+
+                let info;
+                while ((info = enumerator.next_file(null)) !== null) {
+                    const name = info.get_name();
+
+                    if (SYSFS_META_ENTRIES.has(name))
+                        continue;
+
+                    const path = `${rootPath}${name}/`;
+                    if (GLib.file_test(path, GLib.FileTest.EXISTS))
+                        candidates.push(path);
+                }
+
+                enumerator.close(null);
+            } catch (e) {
+                this._log(`Error enumerating ${rootPath}: ${e.message}`);
+            }
+        }
+
+        for (const candidate of candidates) {
+            if (!param && GLib.file_test(candidate, GLib.FileTest.IS_DIR)) {
+                this._modulePathCache[module] = candidate;
+                return candidate;
+            }
+
+            if (param && GLib.file_test(candidate + param, GLib.FileTest.EXISTS)) {
+                this._modulePathCache[module] = candidate;
+                return candidate;
+            }
+        }
+
         return null;
     }
 
@@ -130,7 +209,7 @@ export class VantageManager {
      * @returns {boolean}
      */
     isParamAvailable(module, param) {
-        const basePath = this._getModulePath(module);
+        const basePath = this._getModulePath(module, param);
         if (!basePath) return false;
         return GLib.file_test(basePath + param, GLib.FileTest.EXISTS);
     }
@@ -143,7 +222,7 @@ export class VantageManager {
      */
     readParam(module, param) {
         return new Promise((resolve) => {
-            const basePath = this._getModulePath(module);
+            const basePath = this._getModulePath(module, param);
             if (!basePath) {
                 resolve(-1);
                 return;
@@ -187,7 +266,7 @@ export class VantageManager {
      */
     writeParam(module, param, value) {
         return new Promise((resolve) => {
-            const basePath = this._getModulePath(module);
+            const basePath = this._getModulePath(module, param);
             if (!basePath) {
                 resolve(false);
                 return;
