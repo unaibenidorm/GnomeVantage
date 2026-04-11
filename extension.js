@@ -572,21 +572,67 @@ export default class GnomeVantageExtension extends Extension {
         this._quickSettingsIndicator = null;
     }
 
+    _destroyQuickSettingsIndicator() {
+        if (!this._quickSettingsIndicator)
+            return;
+
+        for (const item of this._quickSettingsIndicator.quickSettingsItems)
+            item.destroy();
+
+        this._quickSettingsIndicator.quickSettingsItems = [];
+        this._quickSettingsIndicator.destroy();
+        this._quickSettingsIndicator = null;
+    }
+
+    _destroyTopBarIndicator() {
+        if (!this._indicator)
+            return;
+
+        this._indicator.destroy();
+        this._indicator = null;
+    }
+
+    _cleanupStaleQuickSettingsEntries() {
+        const quickSettings = Main.panel.statusArea.quickSettings;
+        const externalIndicators = quickSettings?._externalIndicators;
+
+        if (!Array.isArray(externalIndicators))
+            return;
+
+        for (const indicator of [...externalIndicators]) {
+            if (!indicator?.quickSettingsItems || indicator.quickSettingsItems.length === 0)
+                continue;
+
+            const isVantageIndicator = indicator.quickSettingsItems.some(
+                item => item?.title === 'Vantage'
+            );
+
+            if (!isVantageIndicator)
+                continue;
+
+            try {
+                for (const item of indicator.quickSettingsItems)
+                    item.destroy();
+
+                indicator.quickSettingsItems = [];
+                indicator.destroy();
+            } catch (e) {
+                console.error(`[GnomeVantage] Failed to cleanup stale Quick Settings indicator: ${e.message}`);
+            }
+        }
+    }
+
     enable() {
         console.log('[GnomeVantage] Enabling extension');
 
-        // Defensive cleanup in case GNOME resumes with stale actors still mounted.
-        if (this._quickSettingsIndicator) {
-            this._quickSettingsIndicator.destroy();
-            this._quickSettingsIndicator = null;
-        }
-
-        if (this._indicator) {
-            this._indicator.destroy();
-            this._indicator = null;
+        // Be defensive if GNOME lifecycle calls enable() without a clean disable().
+        if (this._indicator || this._quickSettingsIndicator) {
+            console.warn('[GnomeVantage] enable() called while already active; cleaning old instance');
+            this.disable();
         }
 
         removeStaleVantageQuickSettingsEntries();
+        this._cleanupStaleQuickSettingsEntries();
 
         this._settings = this.getSettings();
         this._interfaceSettings = new Gio.Settings({schema_id: INTERFACE_SCHEMA});
@@ -603,15 +649,8 @@ export default class GnomeVantageExtension extends Extension {
 
     disable() {
         console.log('[GnomeVantage] Disabling extension');
-        if (this._quickSettingsIndicator) {
-            this._quickSettingsIndicator.destroy();
-            this._quickSettingsIndicator = null;
-        }
-
-        if (this._indicator) {
-            this._indicator.destroy();
-            this._indicator = null;
-        }
+        this._destroyQuickSettingsIndicator();
+        this._destroyTopBarIndicator();
         this._interfaceSettings = null;
         this._settings = null;
     }

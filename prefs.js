@@ -232,8 +232,8 @@ export default class GnomeVantagePreferences extends ExtensionPreferences {
             title: _('Homepage'),
         });
         urlRow.add_suffix(new Gtk.LinkButton({
-            uri: 'https://gitlab.com/unaibenidorm/gnomevantage',
-            label: 'GitLab',
+            uri: 'https://github.com/unaibenidorm/gnomevantage',
+            label: 'GitHub',
             valign: Gtk.Align.CENTER,
         }));
         aboutGroup.add(urlRow);
