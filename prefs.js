@@ -40,6 +40,60 @@ const PANEL_ICON_CHOICES = [
 ];
 
 export default class GnomeVantagePreferences extends ExtensionPreferences {
+    _getPasswordlessSetupCommand() {
+        return 'if command -v curl >/dev/null 2>&1; then curl -fsSL https://raw.githubusercontent.com/unaibenidorm/GnomeVantage/master/util/gnomevantage-noroot.service -o /etc/systemd/system/gnomevantage-noroot.service; elif command -v wget >/dev/null 2>&1; then wget -qO /etc/systemd/system/gnomevantage-noroot.service https://raw.githubusercontent.com/unaibenidorm/GnomeVantage/master/util/gnomevantage-noroot.service; else echo "Neither curl nor wget is installed." >&2; exit 1; fi && systemctl daemon-reload && systemctl enable --now gnomevantage-noroot.service';
+    }
+
+    _runSubprocess(argv) {
+        return new Promise((resolve, reject) => {
+            try {
+                const proc = Gio.Subprocess.new(
+                    argv,
+                    Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+                );
+
+                proc.communicate_utf8_async(null, null, (subprocess, result) => {
+                    try {
+                        const [, stdout, stderr] = subprocess.communicate_utf8_finish(result);
+                        resolve({
+                            ok: subprocess.get_successful(),
+                            stdout: stdout ?? '',
+                            stderr: stderr ?? '',
+                        });
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    async _installPasswordlessService(installRow, installButton) {
+        installButton.sensitive = false;
+        installRow.subtitle = _('Installing service (authentication may be required)...');
+
+        try {
+            const command = this._getPasswordlessSetupCommand();
+            const result = await this._runSubprocess(['pkexec', 'sh', '-c', command]);
+
+            if (result.ok) {
+                installRow.subtitle = _('Service installed and started successfully.');
+                return;
+            }
+
+            const details = (result.stderr || result.stdout || '').trim().split('\n')[0];
+            installRow.subtitle = details
+                ? `${_('Installation failed')}: ${details}`
+                : _('Installation failed.');
+        } catch (e) {
+            installRow.subtitle = `${_('Installation failed')}: ${e.message}`;
+        } finally {
+            installButton.sensitive = true;
+        }
+    }
+
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
 
@@ -157,13 +211,29 @@ export default class GnomeVantagePreferences extends ExtensionPreferences {
         // --- Password-less operation ---
         const noRootGroup = new Adw.PreferencesGroup({
             title: _('Password-less Operation'),
-            description: _('By default, sysfs files are only writeable by root. Run the installation script once to enable automatic password-less toggling.'),
+            description: _('By default, sysfs files are only writeable by root. Install the service once to enable automatic password-less toggling.'),
         });
         setupPage.add(noRootGroup);
 
+        const installRow = new Adw.ActionRow({
+            title: _('One-click Setup'),
+            subtitle: _('Downloads the systemd service from GitHub and installs it with administrator privileges.'),
+        });
+
+        const installButton = new Gtk.Button({
+            label: _('Install Now'),
+            valign: Gtk.Align.CENTER,
+        });
+        installButton.add_css_class('suggested-action');
+        installButton.connect('clicked', () => {
+            this._installPasswordlessService(installRow, installButton);
+        });
+        installRow.add_suffix(installButton);
+        noRootGroup.add(installRow);
+
         const cmdRow = new Adw.ActionRow({
             title: _('Automatic Setup Command'),
-            subtitle: 'sudo ~/.local/share/gnome-shell/extensions/gnomevantage@unaibenidorm/util/install-passwordless.sh',
+            subtitle: `sudo sh -c '${this._getPasswordlessSetupCommand()}'`,
             activatable: true,
         });
         cmdRow.add_suffix(new Gtk.Image({

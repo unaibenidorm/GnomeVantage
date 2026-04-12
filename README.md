@@ -68,10 +68,10 @@ gnome-extensions enable gnomevantage@unaibenidorm
 
 ## Password-less Operation
 
-By default, sysfs files are only writeable by root. If you want automatic password-less operation, run the included setup script once:
+By default, sysfs files are only writeable by root. If you want automatic password-less operation, run this setup command once:
 
 ```bash
-sudo ~/.local/share/gnome-shell/extensions/gnomevantage@unaibenidorm/util/install-passwordless.sh
+sudo sh -c 'curl -fsSL https://raw.githubusercontent.com/unaibenidorm/GnomeVantage/master/util/gnomevantage-noroot.service -o /etc/systemd/system/gnomevantage-noroot.service && systemctl daemon-reload && systemctl enable --now gnomevantage-noroot.service'
 ```
 
 ## Preferences

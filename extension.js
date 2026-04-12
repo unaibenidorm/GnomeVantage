@@ -262,8 +262,10 @@ class VantageIndicator extends PanelMenu.Button {
         this._manager = new VantageManager();
         this._rebootDialog = new RebootDialog(this._manager);
         this._menuItems = [];
-        this._settingsSignals = [];
+        this._showTopBarSignalId = 0;
+        this._panelIconSignalId = 0;
         this._interfaceSignalId = 0;
+        this._menuOpenSignalId = 0;
 
         // --- Panel icon ---
         this._panelIcon = new St.Icon({
@@ -273,12 +275,12 @@ class VantageIndicator extends PanelMenu.Button {
         this.add_child(this._panelIcon);
 
         if (this._settings) {
-            this._settingsSignals.push(this._settings.connect(
+            this._showTopBarSignalId = this._settings.connect(
                 'changed::show-top-bar-icon', () => this._updateTopBarVisibility()
-            ));
-            this._settingsSignals.push(this._settings.connect(
+            );
+            this._panelIconSignalId = this._settings.connect(
                 'changed::panel-icon-name', () => this._updatePanelIcon()
-            ));
+            );
         }
 
         this._interfaceSignalId = this._interfaceSettings.connect(
@@ -292,7 +294,7 @@ class VantageIndicator extends PanelMenu.Button {
         this._buildMenu();
 
         // --- Refresh on menu open ---
-        this.menu.connect('open-state-changed', (menu, isOpen) => {
+        this._menuOpenSignalId = this.menu.connect('open-state-changed', (menu, isOpen) => {
             if (isOpen)
                 this._refreshAll();
         });
@@ -453,15 +455,21 @@ class VantageIndicator extends PanelMenu.Button {
      * Clean up all resources.
      */
     _onDestroy() {
+        if (this._menuOpenSignalId)
+            this.menu.disconnect(this._menuOpenSignalId);
+
         if (this._interfaceSignalId)
             this._interfaceSettings.disconnect(this._interfaceSignalId);
 
-        if (this._settings) {
-            for (const signalId of this._settingsSignals)
-                this._settings.disconnect(signalId);
-        }
+        if (this._settings && this._showTopBarSignalId)
+            this._settings.disconnect(this._showTopBarSignalId);
 
-        this._settingsSignals = [];
+        if (this._settings && this._panelIconSignalId)
+            this._settings.disconnect(this._panelIconSignalId);
+
+        this._menuOpenSignalId = 0;
+        this._showTopBarSignalId = 0;
+        this._panelIconSignalId = 0;
         this._interfaceSignalId = 0;
         this._manager.destroy();
         this._rebootDialog.destroy();
