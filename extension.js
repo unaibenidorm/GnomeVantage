@@ -454,7 +454,7 @@ class VantageIndicator extends PanelMenu.Button {
     /**
      * Clean up all resources.
      */
-    _onDestroy() {
+    destroy() {
         if (this._menuOpenSignalId)
             this.menu.disconnect(this._menuOpenSignalId);
 
@@ -474,7 +474,7 @@ class VantageIndicator extends PanelMenu.Button {
         this._manager.destroy();
         this._rebootDialog.destroy();
         this._menuItems = [];
-        super._onDestroy();
+        super.destroy();
     }
 });
 
@@ -530,6 +530,62 @@ class VantageQuickSettingsToggle extends QuickSettings.QuickToggle {
     }
 });
 
+const VantageQuickSettingsDropdown = GObject.registerClass(
+class VantageQuickSettingsDropdown extends QuickSettings.QuickMenuToggle {
+    _init(settings, interfaceSettings, topBarIndicator) {
+        super._init({
+            title: 'Vantage',
+            iconName: 'computer-laptop-symbolic',
+        });
+
+        this._settings = settings;
+        this._interfaceSettings = interfaceSettings;
+        this._topBarIndicator = topBarIndicator;
+        this._settingsSignals = [];
+        this._interfaceSignalId = 0;
+        this._vantageSource = 'gnomevantage';
+
+        this.menu.setHeader('computer-laptop-symbolic', 'Vantage');
+
+        const openItem = new PopupMenu.PopupMenuItem(_('Open controls'));
+        openItem.connect('activate', () => this._openTopBarMenu());
+        this.menu.addMenuItem(openItem);
+
+        this._settingsSignals.push(this._settings.connect(
+            'changed::panel-icon-name', () => this._updateIcon()
+        ));
+
+        this._interfaceSignalId = this._interfaceSettings.connect(
+            `changed::${COLOR_SCHEME_KEY}`, () => this._updateIcon()
+        );
+
+        this._updateIcon();
+    }
+
+    _openTopBarMenu() {
+        this._topBarIndicator.openFromQuickSettings();
+    }
+
+    _updateIcon() {
+        const selectedIcon = resolvePanelIconKey(this._settings, this._interfaceSettings);
+        this.iconName = selectedIcon.endsWith('-symbolic')
+            ? selectedIcon
+            : 'computer-laptop-symbolic';
+    }
+
+    destroy() {
+        if (this._interfaceSignalId)
+            this._interfaceSettings.disconnect(this._interfaceSignalId);
+
+        for (const signalId of this._settingsSignals)
+            this._settings.disconnect(signalId);
+
+        this._interfaceSignalId = 0;
+        this._settingsSignals = [];
+        super.destroy();
+    }
+});
+
 const VantageQuickSettingsIndicator = GObject.registerClass(
 class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
     _init(settings, interfaceSettings, topBarIndicator) {
@@ -537,13 +593,22 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
 
         this._settings = settings;
         this._settingsSignals = [];
-
-        this.quickSettingsItems.push(
-            new VantageQuickSettingsToggle(settings, interfaceSettings, topBarIndicator)
+        this._buttonItem = new VantageQuickSettingsToggle(
+            settings, interfaceSettings, topBarIndicator
         );
+        this._dropdownItem = new VantageQuickSettingsDropdown(
+            settings, interfaceSettings, topBarIndicator
+        );
+
+        this.quickSettingsItems.push(this._buttonItem);
+        this.quickSettingsItems.push(this._dropdownItem);
 
         this._settingsSignals.push(this._settings.connect(
             'changed::show-quick-settings-entry', () => this._updateVisibility()
+        ));
+
+        this._settingsSignals.push(this._settings.connect(
+            'changed::show-quick-settings-dropdown', () => this._updateVisibility()
         ));
 
         this._updateVisibility();
@@ -551,8 +616,10 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
 
     _updateVisibility() {
         const visible = this._settings.get_boolean('show-quick-settings-entry');
-        for (const item of this.quickSettingsItems)
-            item.visible = visible;
+        const showDropdown = this._settings.get_boolean('show-quick-settings-dropdown');
+
+        this._buttonItem.visible = visible && !showDropdown;
+        this._dropdownItem.visible = visible && showDropdown;
     }
 
     destroy() {
@@ -584,10 +651,6 @@ export default class GnomeVantageExtension extends Extension {
         if (!this._quickSettingsIndicator)
             return;
 
-        for (const item of this._quickSettingsIndicator.quickSettingsItems)
-            item.destroy();
-
-        this._quickSettingsIndicator.quickSettingsItems = [];
         this._quickSettingsIndicator.destroy();
         this._quickSettingsIndicator = null;
     }
@@ -619,10 +682,6 @@ export default class GnomeVantageExtension extends Extension {
                 continue;
 
             try {
-                for (const item of indicator.quickSettingsItems)
-                    item.destroy();
-
-                indicator.quickSettingsItems = [];
                 indicator.destroy();
             } catch (e) {
                 console.error(`[GnomeVantage] Failed to cleanup stale Quick Settings indicator: ${e.message}`);
