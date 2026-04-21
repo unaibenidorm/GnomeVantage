@@ -15,7 +15,7 @@ This is meant to offer an alternative to the official, proprietary and Windows-o
 - **Desktop notifications** when toggling settings
 - **Reboot dialog** for settings that require a restart (e.g. hybrid GPU)
 - **Preferences window** to customize visible controls, top bar icon, and quick settings entry
-- **Quick Settings button** labeled Vantage that opens the same control menu, with an optional dropdown mode
+- **Quick Settings button** labeled Vantage that opens the same control menu
 - **Original plasmoid auto icon mode** (dark theme uses plasmoid light, light theme uses plasmoid)
 
 ## Controls

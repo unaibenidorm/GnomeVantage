@@ -61,6 +61,58 @@ function removeStaleVantageQuickSettingsEntries() {
     }
 }
 
+function addControlMenuItems(menu, menuItems, settings, extensionPath, manager, rebootDialog) {
+    const ideapadControls = VANTAGE_CONTROLS.filter(c => c.module === 'ideapad');
+    const legionControls = VANTAGE_CONTROLS.filter(c => c.module === 'legion');
+
+    function addSectionHeader(title) {
+        const sectionItem = new PopupMenu.PopupMenuItem(title, {
+            reactive: false,
+            can_focus: false,
+        });
+        sectionItem.label.add_style_class_name('gnomevantage-header');
+        menu.addMenuItem(sectionItem);
+    }
+
+    if (ideapadControls.length > 0) {
+        addSectionHeader('Ideapad');
+
+        for (const control of ideapadControls) {
+            if (!manager.isParamAvailable(control.module, control.param))
+                continue;
+
+            const settingsKey = `show-${control.id.replace(/_/g, '-')}`;
+            if (settings && !settings.get_boolean(settingsKey))
+                continue;
+
+            const item = new VantageMenuItem(
+                control, extensionPath, manager, rebootDialog
+            );
+            menu.addMenuItem(item);
+            menuItems.push(item);
+        }
+    }
+
+    if (legionControls.length > 0) {
+        addSectionHeader('Legion');
+
+        for (const control of legionControls) {
+            if (!manager.isParamAvailable(control.module, control.param))
+                continue;
+
+            const settingsKey = `show-${control.id.replace(/_/g, '-')}`;
+            if (settings && !settings.get_boolean(settingsKey))
+                continue;
+
+            const item = new VantageMenuItem(
+                control, extensionPath, manager, rebootDialog
+            );
+            menu.addMenuItem(item);
+            menuItems.push(item);
+        }
+    }
+}
+
 /**
  * Custom PopupMenu item with an icon, label column, and a status button.
  * Replaces the KDE PlasmaComponents.ItemDelegate + Button pattern.
@@ -295,8 +347,10 @@ class VantageIndicator extends PanelMenu.Button {
 
         // --- Refresh on menu open ---
         this._menuOpenSignalId = this.menu.connect('open-state-changed', (menu, isOpen) => {
-            if (isOpen)
+            if (isOpen) {
+                this._rebuildMenu();
                 this._refreshAll();
+            }
         });
 
         // --- Initial read ---
@@ -315,55 +369,14 @@ class VantageIndicator extends PanelMenu.Button {
         headerItem.label.add_style_class_name('gnomevantage-header');
         this.menu.addMenuItem(headerItem);
 
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        // Group controls by module
-        const ideapadControls = VANTAGE_CONTROLS.filter(c => c.module === 'ideapad');
-        const legionControls = VANTAGE_CONTROLS.filter(c => c.module === 'legion');
-
-        // Ideapad section
-        if (ideapadControls.length > 0) {
-            const ideapadSection = new PopupMenu.PopupSeparatorMenuItem('Ideapad');
-            this.menu.addMenuItem(ideapadSection);
-
-            for (const control of ideapadControls) {
-                if (!this._manager.isParamAvailable(control.module, control.param))
-                    continue;
-
-                // Check if hidden via preferences
-                const settingsKey = `show-${control.id.replace(/_/g, '-')}`;
-                if (this._settings && !this._settings.get_boolean(settingsKey))
-                    continue;
-
-                const item = new VantageMenuItem(
-                    control, this._extensionPath, this._manager, this._rebootDialog
-                );
-                this.menu.addMenuItem(item);
-                this._menuItems.push(item);
-            }
-        }
-
-        // Legion section
-        if (legionControls.length > 0) {
-            const legionSection = new PopupMenu.PopupSeparatorMenuItem('Legion');
-            this.menu.addMenuItem(legionSection);
-
-            for (const control of legionControls) {
-                if (!this._manager.isParamAvailable(control.module, control.param))
-                    continue;
-
-                // Check if hidden via preferences
-                const settingsKey = `show-${control.id.replace(/_/g, '-')}`;
-                if (this._settings && !this._settings.get_boolean(settingsKey))
-                    continue;
-
-                const item = new VantageMenuItem(
-                    control, this._extensionPath, this._manager, this._rebootDialog
-                );
-                this.menu.addMenuItem(item);
-                this._menuItems.push(item);
-            }
-        }
+        addControlMenuItems(
+            this.menu,
+            this._menuItems,
+            this._settings,
+            this._extensionPath,
+            this._manager,
+            this._rebootDialog
+        );
 
         // If no controls are available at all, show an info message
         if (this._menuItems.length === 0) {
@@ -375,6 +388,12 @@ class VantageIndicator extends PanelMenu.Button {
             noItems.label.add_style_class_name('gnomevantage-no-hw');
             this.menu.addMenuItem(noItems);
         }
+    }
+
+    _rebuildMenu() {
+        this.menu.removeAll();
+        this._menuItems = [];
+        this._buildMenu();
     }
 
     /**
@@ -538,94 +557,38 @@ class VantageQuickSettingsToggle extends QuickSettings.QuickToggle {
     }
 });
 
-const VantageQuickSettingsDropdown = GObject.registerClass(
-class VantageQuickSettingsDropdown extends QuickSettings.QuickMenuToggle {
-    _init(settings, interfaceSettings, topBarIndicator) {
-        super._init({
-            title: 'Vantage',
-            iconName: 'computer-laptop-symbolic',
-        });
-
-        this._settings = settings;
-        this._interfaceSettings = interfaceSettings;
-        this._topBarIndicator = topBarIndicator;
-        this._settingsSignals = [];
-        this._interfaceSignalId = 0;
-        this._vantageSource = 'gnomevantage';
-
-        this.menu.setHeader('computer-laptop-symbolic', 'Vantage');
-
-        const openItem = new PopupMenu.PopupMenuItem(_('Open controls'));
-        openItem.connect('activate', () => this._openTopBarMenu());
-        this.menu.addMenuItem(openItem);
-
-        this._settingsSignals.push(this._settings.connect(
-            'changed::panel-icon-name', () => this._updateIcon()
-        ));
-
-        this._interfaceSignalId = this._interfaceSettings.connect(
-            `changed::${COLOR_SCHEME_KEY}`, () => this._updateIcon()
-        );
-
-        this._updateIcon();
-    }
-
-    _openTopBarMenu() {
-        this._topBarIndicator.openFromQuickSettings();
-    }
-
-    setActiveState(active) {
-        this.checked = active;
-    }
-
-    _updateIcon() {
-        const selectedIcon = resolvePanelIconKey(this._settings, this._interfaceSettings);
-        this.iconName = selectedIcon.endsWith('-symbolic')
-            ? selectedIcon
-            : 'computer-laptop-symbolic';
-    }
-
-    destroy() {
-        if (this._interfaceSignalId)
-            this._interfaceSettings.disconnect(this._interfaceSignalId);
-
-        for (const signalId of this._settingsSignals)
-            this._settings.disconnect(signalId);
-
-        this._interfaceSignalId = 0;
-        this._settingsSignals = [];
-        super.destroy();
-    }
-});
-
 const VantageQuickSettingsIndicator = GObject.registerClass(
 class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
     _init(settings, interfaceSettings, topBarIndicator) {
         super._init();
 
         this._settings = settings;
+        this._topBarIndicator = topBarIndicator;
         this._settingsSignals = [];
+        this._stateRefreshSourceId = 0;
         this._buttonItem = new VantageQuickSettingsToggle(
-            settings, interfaceSettings, topBarIndicator
-        );
-        this._dropdownItem = new VantageQuickSettingsDropdown(
             settings, interfaceSettings, topBarIndicator
         );
 
         this.quickSettingsItems.push(this._buttonItem);
-        this.quickSettingsItems.push(this._dropdownItem);
 
         this._settingsSignals.push(this._settings.connect(
             'changed::show-quick-settings-entry', () => this._updateVisibility()
         ));
 
         this._settingsSignals.push(this._settings.connect(
-            'changed::show-quick-settings-dropdown', () => this._updateVisibility()
-        ));
-
-        this._settingsSignals.push(this._settings.connect(
             'changed::show-quick-settings-active-state', () => this._updateState()
         ));
+
+        // Keep active state in sync if the kernel driver is loaded/unloaded at runtime.
+        this._stateRefreshSourceId = GLib.timeout_add_seconds(
+            GLib.PRIORITY_DEFAULT,
+            2,
+            () => {
+                this._updateState();
+                return GLib.SOURCE_CONTINUE;
+            }
+        );
 
         this._updateState();
         this._updateVisibility();
@@ -633,27 +596,28 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
 
     _updateVisibility() {
         const visible = this._settings.get_boolean('show-quick-settings-entry');
-        const showDropdown = this._settings.get_boolean('show-quick-settings-dropdown');
 
-        this._buttonItem.visible = visible && !showDropdown;
-        this._dropdownItem.visible = visible && showDropdown;
+        this._buttonItem.visible = visible;
     }
 
     _updateState() {
         const showActiveState = this._settings.get_boolean('show-quick-settings-active-state');
-        const active = showActiveState && this._topBarIndicator.hasLegionSupport();
+        const active = showActiveState && !!this._topBarIndicator?.hasLegionSupport?.();
 
         this._buttonItem.setActiveState(active);
-        this._dropdownItem.setActiveState(active);
     }
 
     destroy() {
+        if (this._stateRefreshSourceId)
+            GLib.source_remove(this._stateRefreshSourceId);
+
         for (const signalId of this._settingsSignals)
             this._settings.disconnect(signalId);
 
         for (const item of this.quickSettingsItems)
             item.destroy();
 
+        this._stateRefreshSourceId = 0;
         this.quickSettingsItems.length = 0;
         this._settingsSignals = [];
         super.destroy();

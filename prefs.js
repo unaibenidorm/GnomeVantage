@@ -178,17 +178,6 @@ export default class GnomeVantagePreferences extends ExtensionPreferences {
         );
         topBarGroup.add(showQuickSettingsRow);
 
-        const showQuickSettingsDropdownRow = new Adw.SwitchRow({
-            title: _('Use Quick Settings Dropdown'),
-            subtitle: _('Show the GnomeVantage tile as a dropdown menu.'),
-        });
-        settings.bind(
-            'show-quick-settings-dropdown',
-            showQuickSettingsDropdownRow, 'active',
-            Gio.SettingsBindFlags.DEFAULT
-        );
-        topBarGroup.add(showQuickSettingsDropdownRow);
-
         const showQuickSettingsActiveStateRow = new Adw.SwitchRow({
             title: _('Highlight Active Tile'),
             subtitle: _('Show the tile as active when Legion support is detected.'),
