@@ -70,6 +70,12 @@
       <description>Whether the GnomeVantage quick settings tile opens as a dropdown menu.</description>
     </key>
 
+    <key name="show-quick-settings-active-state" type="b">
+      <default>true</default>
+      <summary>Show active quick settings state</summary>
+      <description>Whether the GnomeVantage quick settings tile should appear active when Legion support is available.</description>
+    </key>
+
     <key name="panel-icon-name" type="s">
       <default>'plasmoid-auto'</default>
       <summary>Top bar icon name</summary>

@@ -189,6 +189,17 @@ export default class GnomeVantagePreferences extends ExtensionPreferences {
         );
         topBarGroup.add(showQuickSettingsDropdownRow);
 
+        const showQuickSettingsActiveStateRow = new Adw.SwitchRow({
+            title: _('Highlight Active Tile'),
+            subtitle: _('Show the tile as active when Legion support is detected.'),
+        });
+        settings.bind(
+            'show-quick-settings-active-state',
+            showQuickSettingsActiveStateRow, 'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        topBarGroup.add(showQuickSettingsActiveStateRow);
+
         const iconModel = new Gtk.StringList();
         for (const choice of PANEL_ICON_CHOICES)
             iconModel.append(_(choice.label));

@@ -421,6 +421,10 @@ class VantageIndicator extends PanelMenu.Button {
         this._panelIcon.icon_name = 'computer-laptop-symbolic';
     }
 
+    hasLegionSupport() {
+        return this._manager.isModuleAvailable('legion');
+    }
+
     openFromQuickSettings() {
         const hiddenFromTopBar = this._settings && !this._settings.get_boolean('show-top-bar-icon');
 
@@ -510,6 +514,10 @@ class VantageQuickSettingsToggle extends QuickSettings.QuickToggle {
         this._topBarIndicator.openFromQuickSettings();
     }
 
+    setActiveState(active) {
+        this.checked = active;
+    }
+
     _updateIcon() {
         const selectedIcon = resolvePanelIconKey(this._settings, this._interfaceSettings);
         this.iconName = selectedIcon.endsWith('-symbolic')
@@ -566,6 +574,10 @@ class VantageQuickSettingsDropdown extends QuickSettings.QuickMenuToggle {
         this._topBarIndicator.openFromQuickSettings();
     }
 
+    setActiveState(active) {
+        this.checked = active;
+    }
+
     _updateIcon() {
         const selectedIcon = resolvePanelIconKey(this._settings, this._interfaceSettings);
         this.iconName = selectedIcon.endsWith('-symbolic')
@@ -611,6 +623,11 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
             'changed::show-quick-settings-dropdown', () => this._updateVisibility()
         ));
 
+        this._settingsSignals.push(this._settings.connect(
+            'changed::show-quick-settings-active-state', () => this._updateState()
+        ));
+
+        this._updateState();
         this._updateVisibility();
     }
 
@@ -620,6 +637,14 @@ class VantageQuickSettingsIndicator extends QuickSettings.SystemIndicator {
 
         this._buttonItem.visible = visible && !showDropdown;
         this._dropdownItem.visible = visible && showDropdown;
+    }
+
+    _updateState() {
+        const showActiveState = this._settings.get_boolean('show-quick-settings-active-state');
+        const active = showActiveState && this._topBarIndicator.hasLegionSupport();
+
+        this._buttonItem.setActiveState(active);
+        this._dropdownItem.setActiveState(active);
     }
 
     destroy() {
