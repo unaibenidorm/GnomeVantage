@@ -31,6 +31,9 @@ This is meant to offer an alternative to the official, proprietary and Windows-o
 | Display Overdrive | legion | Reduce display latency (ghosting) |
 | Hybrid Graphics | legion | Enable integrated GPU (requires reboot) |
 
+<img width="646" height="951" alt="image" src="https://github.com/user-attachments/assets/930c8f4b-ee2b-4e80-9814-c38f5ef8145a" />
+
+
 ## Requirements
 
 - **GNOME Shell** 45, 46, 47, 48, 49, or 50
