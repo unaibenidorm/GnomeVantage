@@ -92,10 +92,6 @@ In the Setup page, clicking the **Automatic Setup Command** row copies the comma
 - This is just a hobby project and is **NOT AFFILIATED WITH LENOVO IN ANY WAY**.
 - This extension uses sysfs interfaces provided by LenovoLegionLinux and ideapad modules. Since these interfaces were discovered through reverse engineering, **THIS COMES WITH NO WARRANTY AND SHOULD BE USED AT YOUR OWN RISK**.
 
-## License
-
-Mozilla Public License 2.0.
-
 ## Credits
 
 - Original [PlasmaVantage](https://gitlab.com/Scias/plasmavantage) by Scias
