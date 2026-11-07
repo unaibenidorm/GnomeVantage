@@ -25,7 +25,7 @@ class RebootDialog extends ModalDialog.ModalDialog {
 
         // --- Content ---
         const content = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             style_class: 'gnomevantage-reboot-content',
         });
 

@@ -36,7 +36,7 @@ This is meant to offer an alternative to the official, proprietary and Windows-o
 
 ## Requirements
 
-- **GNOME Shell** 45, 46, 47, 48, 49, or 50
+- **GNOME Shell** 45, 46, 47, 48, 49, 50, or 51
 - [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) kernel module (for Legion controls)
 - Ideapad kernel module (included in mainline Linux, for Ideapad controls)
 
